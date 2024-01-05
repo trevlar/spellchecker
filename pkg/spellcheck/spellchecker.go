@@ -7,21 +7,6 @@ import (
 	"sync"
 )
 
-/**
- * Performance improvements to make:
-
- * Improving Suggestions with HashMap:
- * Implementing a trie structure for the dictionary can facilitate more efficient suggestions based on prefixes.
-
- * Word Length:
- * Compare the length of the misspelled word with words in the dictionary.
- * If they are similar in length (e.g., within a range of ±1 or ±2 characters), you can consider them as potential suggestions.
-
- * Common Substrings:
- * Look for words in the dictionary that have common substrates with the misspelled word.
- * For instance, words starting or ending with the same few letters.
-**/
-
 type SpellChecker struct {
 	dictionary        *dictionary.Dictionary
 	spellcheckResults SpellCheckResults
