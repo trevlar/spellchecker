@@ -1,0 +1,46 @@
+Source: https://en.wikipedia.org/wiki/Lambda_architecture
+Modified to include spelling errors for testing the spelling application.
+
+Lambda architecture is a data-prosessing archetecture designed to handle massive quantites of data by taking advantge of both batch and strem-processing methods. This aproach to archetecture attempts to balance latenccy, throughput, and fault-tolerence by using batch procesing to provide comprehensiv and acurate views of batch data, while simultaniously using real-time stream procesing to provide views of onlene data. The two view outputs may be joyned before presentation. The rise of lambda architecture is corelated with the growth of big data, real-time analytics, and the drive to mitigate the latencies of map-reduce.[1]
+
+Lambda archtecture depends on a data model with an append-only, imutable data sorce that serves as a system of record.[2]: 32  It is intended for ingesting and processing timestamped evens that are appended to existing evens rather than overwriting them. State is determined from the natural time-based orderring of the data.
+
+Overview
+Lambda architecture describes a system consisting of three layrs: batch procesing, speed (or real-time) procesing, and a serving layer for responding to quereis.[3]: 13  The procesing layrs ingest from an immutable master copy of the entire data set. This paradigm was first described by Nathan Marz in a blog post titled "How to beat the CAP theorem" in which he orignally termed it the "batch/realtime archetecture".[4]
+
+Batch layr
+The batch layr precomputes results using a distributed procesing system that can handle very large quantites of data. The batch layr aims at perfect acuracy by being able to proces all available data when generating views. This means it can fix any erors by recomputing based on the complete data set, then updating existing views. Output is typically stored in a read-only database, with updates completely replacing existing precomputed views.[3]: 18 
+
+By 2014, Apache Hadoop was estimated to be a leading batch-procesing system.[5] Later, other, relational databases like Snowflake, Redshift, Synapse and Big Query were also used in this role.
+
+Speed layr
+
+Diagram showing the flow of data through the procesing and serving layrs of lambda architecture. Example named components are shown.
+The speed layr processes data streams in real time and without the requirements of fix-ups or completenes. This layr sacrifices throughput as it aims to minimize latency by providing real-time views into the most recent data. Essentialy, the speed layr is responsible for filling the "gap" caused by the batch layr's lag in providing views based on the most recent data. This layr's views may not be as acurate or complete as the ones eventualy produced by the batch layr, but they are available almost immediately after data is received, and can be replaced when the batch layr's views for the same data become available.[3]: 203 
+
+Stream-procesing tecnologies typicaly used in this layr include Apache Kafka, Amazon Kinesis, Apache Storm, SQLstream, Apache Samza, Apache Spark, Azure Stream Analytics. Output is typicaly stored on fast NoSQL databases.,[6][7] or as a commit log.[8]
+
+Serving layr
+
+Diagram showing a lambda architecture with a Druid data store.
+Output from the batch and speed layrs are stored in the serving layr, which responds to ad-hoc quereis by returning precomputed views or building views from the processed data.
+
+Examples of tecnologies used in the serving layr include Apache Druid, Apache Pinot, ClickHouse and Tinybird which provide a single platform to handle output from both layrs.[9] Dedicated stores used in the serving layr include Apache Cassandra, Apache HBase, Azure Cosmos DB, MongoDB, VoltDB or Elasticsearch for speed-layr output, and Elephant DB, Apache Impala, SAP HANA or Apache Hive for batch-layr output.[2]: 45 [6]
+
+Optimizations
+To optimize the data set and improve query eficiency, various rolup and aggregation tecniques are executed on raw data,[9]: 23  while estimation tecniques are employed to further reduce computation costs.[10] And while expensive ful recomputation is required for fault tolerence, incremental computation algorithms may be selectively added to increase eficiency, and tecniques such as partial computation and resource-usage optimizations can efectively help lower latency.[3]: 93, 287, 293 
+
+Lambda architecture in use
+Metamarkets, which provides analytics for companies in the programatic advertising space, employs a version of the lambda architecture that uses Druid for storing and serving both the stremed and batch-processed data.[9]: 42 
+
+For running analytics on its advertising data warehouse, Yahoo has taken a similar apro
+
+ach, also using Apache Storm, Apache Hadoop, and Druid.[11]: 9, 16 
+
+The Netflix Suro project has separate procesing paths for data, but does not strictly folow lambda architecture since the paths may be intended to serve diferent purposes and not necessarily to provide the same type of views.[12] Nevertheles, the overal idea is to make selected real-time event data available to queries with very low latency, while the entire data set is also processed via a batch pipeline. The later is intended for aplications that are less sensitive to latency and require a map-reduce type of procesing.
+
+Criticism and alternatives
+Criticism of lambda architecture has focused on its inherent complexity and its limiting influence. The batch and streming sides each require a diferent code base that must be maintained and kept in sync so that processed data produces the same result from both paths. Yet atempting to abstract the code bases into a single framework puts many of the specialized tools in the batch and real-time ecosystems out of reach.[13]
+
+Kappa architecture
+Jay Kreps introduced the kappa architecture to use a pure streming aproach with a single code base.[13] In a technical discusion over the merits of employing a pure streming aproach, it was noted that using a flexible streming framework such as Apache Samza could provide some of the same benefits as batch procesing without the latency.[14] Such a streming framework could alow for colecting and procesing arbitrarely large windows of data, acomodate blocking, and handle state.
