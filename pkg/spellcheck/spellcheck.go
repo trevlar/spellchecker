@@ -26,8 +26,8 @@ func CheckSpellingForFile(filename string, dict *dictionary.Dictionary) error {
 			misspellingResults: make(map[string]MisspellingResult),
 			misspelledWords:    make([]string, 0),
 		},
-		hasMisspellings: false,
-		processing:      make(map[string]bool),
+		hasMisspellings: 			false,
+		wordsProcessed:      make(map[string]bool),
 	}
 
 	scanner := bufio.NewScanner(file)

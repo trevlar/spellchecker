@@ -20,6 +20,15 @@ I packaged the terminal output into an easy to read format that provides a list 
 
 This was a fun project to work on and I learned a lot more about the complexities regarding spellchecking.
 
+## Run without installing
+
+To run the spellchecker without installing it you can use the following command in the terminal.
+
+```bash
+cd /directory/to/spellchecker
+go run ./cmd/spellchecker <file-to-check> <dictionary>
+```
+
 ## Installation
 
 Ensure that you have [Golang](https://golang.org/doc/install) installed on your machine.
