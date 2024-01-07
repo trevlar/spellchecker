@@ -45,7 +45,8 @@ func CheckSpellingForFile(filename string, dict *dictionary.Dictionary) error {
 
 	spellcheck := SpellCheckPrinter{
 		hasMisspellings: checker.hasMisspellings,
-		results: &checker.spellcheckResults,
+		misspelledWords: checker.spellcheckResults.misspelledWords,
+		results: checker.spellcheckResults.misspellingResults,
 	}
 	spellcheck.printResults()
 

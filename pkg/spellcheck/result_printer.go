@@ -8,45 +8,40 @@ import (
 
 type SpellCheckPrinter struct {
 	hasMisspellings bool
-	results *SpellCheckResults
+	misspelledWords []string
+	results map[string]MisspellingResult
 }
 
 func (print *SpellCheckPrinter) printResults() {
 	if print.hasMisspellings {	
-		print.header(print.results.misspelledWords)
+		print.header()
 		print.details()
 	} else {
 		fmt.Println("No misspellings found")
 	}
 }
 
-func (print *SpellCheckPrinter) header(misspelledWords []string) {
-	fmt.Println("========================================")
-	fmt.Println("Summary of Misspelled Words:")
-	fmt.Println("========================================")
-	fmt.Println()
-	concat := fmt.Sprintf("%s, %s", config.Reset, config.Red)
-	fmt.Printf("%s%s%s\n", config.Red, strings.Join(misspelledWords, concat), config.Reset)
-	fmt.Println()
-	fmt.Println()
+func (print *SpellCheckPrinter) header() {
+	print.printSeparator("Summary of Misspelled Words:")
+	var builder strings.Builder
+	for i, word := range print.misspelledWords {
+		builder.WriteString(fmt.Sprintf("%s%s%s", config.Red, word, config.Reset))
+		if i < len(print.misspelledWords) - 1 {
+			builder.WriteString(", ")
+		}
+	}
+	fmt.Println(builder.String())
 }
 
 func (print *SpellCheckPrinter) details() {
-	spellcheckResults := print.results
-
-	fmt.Println("========================================")
-	fmt.Println("Spellcheck Details:")
-	fmt.Println("========================================")
-	fmt.Println()
-	fmt.Println()
-
+	print.printSeparator("Spellcheck Details:")
 	wordNumber := 1
-	for _, word := range spellcheckResults.misspelledWords {
-		result := spellcheckResults.misspellingResults[word]
+	for _, word := range print.misspelledWords {
+		result := print.results[word]
 		fmt.Printf("   %d. \t%sMisspelled Word:%s '%s%s%s'\n", wordNumber, config.Yellow, config.Reset, config.Red, result.word, config.Reset)
 		print.occurrences(result.word, result.wordContext)
 		print.suggestions(result.word, result.suggestedWords)
-		
+		fmt.Println()
 		fmt.Println()
 		wordNumber++
 	}
@@ -56,38 +51,52 @@ func (print *SpellCheckPrinter) occurrences(word string, wordContext []WordConte
 	fmt.Printf("\t%sOccurrences:%s\n", config.Yellow, config.Reset)
 	currentLetter := 'a'
 	for _, wordContext := range wordContext {
-		fmt.Printf("\t\t%c, %sLine%s %d, %sWord%s %d\n",
-			currentLetter,
-			config.Yellow,
-			config.Reset,
-			wordContext.lineNumber,
-			config.Yellow,
-			config.Reset,
-			wordContext.wordNumber,
-		)
-		fmt.Printf("\t\t   %sContext:%s \"... %s %s%s%s %s\" \n",
-			config.Yellow, config.Reset,
-			wordContext.wordsBefore,
-			config.Yellow, word, config.Reset,
-			wordContext.wordsAfter,
-		)
+		print.printOccurrence(word, currentLetter, wordContext)
 		if currentLetter < 'z' {
 			currentLetter++
 		}
 	}
 }
 
+func (print * SpellCheckPrinter) printOccurrence(word string, letter rune, context WordContext) {
+	fmt.Printf("\t\t%c, %sLine%s %d, %sWord%s %d\n",
+		letter,
+		config.Yellow,
+		config.Reset,
+		context.lineNumber,
+		config.Yellow,
+		config.Reset,
+		context.wordNumber,
+	)
+	fmt.Printf("\t\t   %sContext:%s \"... %s %s%s%s %s\" \n",
+		config.Yellow, config.Reset,
+		context.wordsBefore,
+		config.Yellow, word, config.Reset,
+		context.wordsAfter,
+	)
+}
+
 func (print *SpellCheckPrinter) suggestions(word string, suggestedWords []WordSuggestion) {
 	if len(suggestedWords) > 0 {
-		suggestedWordsList := []string{}
-		for _, wordSuggestion := range suggestedWords {
-			suggestedWordsList = append(suggestedWordsList, wordSuggestion.word)
+		var builder strings.Builder
+		for i, suggestion := range suggestedWords {
+			builder.WriteString(fmt.Sprintf("%s%s%s", config.GreenTxt, suggestion.word, config.Reset))
+			if i < len(print.misspelledWords) - 1 {
+				builder.WriteString(", ")
+			}
 		}
-
-		concat := fmt.Sprintf("%s, %s", config.Reset, config.GreenTxt)
-		fmt.Printf("\t%sSuggestions:%s %s%s%s", config.Yellow, config.Reset, config.GreenTxt, strings.Join(suggestedWordsList, concat), config.Reset)
-		fmt.Println()
+		fmt.Printf("\t%sSuggestions:%s %s", config.Yellow, config.Reset, builder.String())
 	} else {
 		fmt.Printf("\t%sNo suggested words found%s\n", config.Red, config.Reset)
 	}
+}
+
+func (print *SpellCheckPrinter) printSeparator(title string) {
+	fmt.Println()
+	fmt.Println()
+	fmt.Println("========================================")
+	fmt.Println(title)
+	fmt.Println("========================================")
+	fmt.Println()
+	fmt.Println()
 }
