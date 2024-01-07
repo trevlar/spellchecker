@@ -43,11 +43,12 @@ func CheckSpellingForFile(filename string, dict *dictionary.Dictionary) error {
 		return checker.spellcheckResults.misspelledWords[i] < checker.spellcheckResults.misspelledWords[j]
 	})
 
-	if checker.hasMisspellings {
-		printSpellcheckResults(checker.spellcheckResults)
-	} else {
-		fmt.Println("No misspellings found")
+	spellcheck := SpellCheckPrinter{
+		hasMisspellings: checker.hasMisspellings,
+		results: &checker.spellcheckResults,
 	}
+	spellcheck.printResults()
+
 	return nil
 }
 
